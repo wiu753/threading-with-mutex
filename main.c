@@ -72,12 +72,7 @@ void *transaction(void *arg)
     FILE *ptr;
     char str[10];
 
-    if (((struct args *)arg)->threadId == 0)
-        ptr = fopen("inn.txt", "r");
-    else if (((struct args *)arg)->threadId == 1)
-        ptr = fopen("ut.txt", "r");
-    else
-        printf("Error: invalid thread id");
+    ptr = (((struct args *)arg)->threadId == 0) ? (fopen("inn.txt", "r")) : (fopen("ut.txt", "r"));
 
     if (NULL == ptr)
         printf("File can't be opened \n");
@@ -86,9 +81,11 @@ void *transaction(void *arg)
     while (fgets(str, sizeof(str), ptr) != NULL)
     {
         pthread_mutex_lock(((struct args *)arg)->mutex);
-        (((struct args *)arg)->threadId) ? (balance -= atoi(str)) : (balance += atoi(str));
+        balance += (((struct args *)arg)->threadId) ? (atoi(str) * (-1)) : (atoi(str));
         pthread_mutex_unlock(((struct args *)arg)->mutex);
     }
+
+    fclose(ptr);
 
     return NULL;
 }
